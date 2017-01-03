@@ -53,12 +53,14 @@ function line(s, speed, start, x, y, dx, attr) {
   }, time(x - start, speed));
 }
 
+Colors = {
+  RED: "#DD1E2F",
+  BLUE: "#5AA8C5",
+  GREEN: "#218559",
+};
+
 function lines() {
   var s = Snap("#svg_lines");
-
-  var red = "#DD1E2F";
-  var blue = "#5aa8c5";
-  var green = "#218559";
 
   var w = 400;
   var h = 200;
@@ -68,17 +70,17 @@ function lines() {
   var by = 3 * h / 6;
   var cy = 4 * h / 6;
 
-  line(s, speed, start, start, ay, 100, {stroke: red});
-  line(s, speed, start, 130, ay, 50, {stroke: red});
-  line(s, speed, start, 200, ay, 75, {stroke: red});
+  line(s, speed, start, start, ay, 100, {stroke: Colors.RED});
+  line(s, speed, start, 130, ay, 50, {stroke: Colors.RED});
+  line(s, speed, start, 200, ay, 75, {stroke: Colors.RED});
 
-  line(s, speed, start, start, by, 75, {stroke: blue});
-  line(s, speed, start, 105, by, 50, {stroke: blue});
-  line(s, speed, start, 175, by, 100, {stroke: blue});
+  line(s, speed, start, start, by, 75, {stroke: Colors.BLUE});
+  line(s, speed, start, 105, by, 50, {stroke: Colors.BLUE});
+  line(s, speed, start, 175, by, 100, {stroke: Colors.BLUE});
 
-  line(s, speed, start, start, cy, 50, {stroke: green});
-  line(s, speed, start, 80, cy, 75, {stroke: green});
-  line(s, speed, start, 175, cy, 100, {stroke: green});
+  line(s, speed, start, start, cy, 50, {stroke: Colors.GREEN});
+  line(s, speed, start, 80, cy, 75, {stroke: Colors.GREEN});
+  line(s, speed, start, 175, cy, 100, {stroke: Colors.GREEN});
 
   window.setTimeout(function() {
     var progress = s.line(start, 1 * h / 6, start, 5 * h / 6);
@@ -90,6 +92,30 @@ function lines() {
     s.clear();
     lines();
   }, 6000);
+}
+
+function grid(s, x0, y0, x1, y1) {
+  var stroke = "gray";
+
+  var strokeWidth = function(x) {
+    if (x % 100 == 0) {
+      return 1.5;
+    } else if (x % 10 == 0) {
+      return 0.75;
+    } else {
+      return 0.1;
+    }
+  }
+
+  for (var x = x0; x <= x1; x += 5) {
+    var line = s.line(x, 0, x, y1);
+    line.attr({stroke:stroke, strokeWidth:strokeWidth(x)});
+  }
+
+  for (var y = y0; y <= y1; y += 5) {
+    var line = s.line(0, y, x1, y);
+    line.attr({stroke:stroke, strokeWidth:strokeWidth(y)});
+  }
 }
 
 function assert(b, msg="Assertion Error.") {
@@ -193,6 +219,47 @@ function envelope(s, x, y, w, h) {
   return s.group(box, left_flap, right_flap, left_line, right_line);
 }
 
+function lines_redux() {
+  var s = Snap("#svg_lines_redux");
+  var w = 400;
+  var h = 200;
+  // grid(s, 0, 0, w, h);
+
+  var ay = 50;
+  var by = 100;
+  var cy = 150;
+
+  var a1 = s.line(10,  ay, 110, ay);
+  var a2 = s.line(130, ay, 180, ay);
+  var a3 = s.line(200, ay, 220, ay);
+  var b1 = s.line(10,  by, 60,  by);
+  var b2 = s.line(80,  by, 100, by);
+  var b3 = s.line(120, by, 220, by);
+  var c1 = s.line(10,  cy, 30,  cy);
+  var c2 = s.line(50,  cy, 150, cy);
+  var c3 = s.line(170, cy, 220, cy);
+
+  for (let e of [a1, a2, a3]) { e.addClass("aline"); }
+  for (let e of [b1, b2, b3]) { e.addClass("bline"); }
+  for (let e of [c1, c2, c3]) { e.addClass("cline"); }
+
+  var yolo = s.text(10, 40, "set(x,4)");
+  yolo.attr({fontSize:8, fontFamily:"monospace"});
+  var b = bubbled(s, yolo, Direction.BOTTOM, 1);
+  b.attr({fill:"transparent", stroke:"black"});
+
+  var diagram = s.group(a1, a2, a3, b1, b2, b3, c1, c2, c3, yolo, b);
+  var rect = s.rect(0, 0, 0, h);
+  rect.attr({fill:"white"});
+  diagram.attr({mask:rect});
+  var progress = s.line(0, 0, 0, h);
+
+  Snap.animate(0, 400, function(x) {
+    rect.attr({width: x});
+  progress.attr({x1:x, x2:x, stroke:"gray", strokeWidth:1});
+  }, 5000, mina.linear, function() {s.clear(); lines_redux();});
+}
+
 function boxes() {
   var s = Snap("#svg_boxed");
 
@@ -228,6 +295,7 @@ function main() {
   basic();
   animate();
   lines();
+  lines_redux();
   boxes();
 }
 

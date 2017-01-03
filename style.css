@@ -46,3 +46,20 @@ svg {
 #svg_boxed text {
   font-family: monospace;
 }
+
+#svg_lines_redux line {
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+#svg_lines_redux .aline {
+  stroke: red;
+}
+
+#svg_lines_redux .bline {
+  stroke: green;
+}
+
+#svg_lines_redux .cline {
+  stroke: blue;
+}
