@@ -291,12 +291,80 @@ function boxes() {
   env.animate({transform: "rotate(-15 50 150) translate(50 0)"}, 2000);
 }
 
+function nodes() {
+  var s = Snap("#svg_nodes");
+  var w = 400;
+  var h = 200;
+  grid(s, 0, 0, w, h);
+
+  var server = s.circle(200, 100, 20);
+  server.attr({fill:Colors.RED});
+
+  var message = s.circle(200, 100, 3);
+  message.attr({fill:"transparent", stroke:Colors.RED, strokeWidth:2});
+  message.animate({cx:300, cy:50}, 2000, function() {
+    message.animate({cx:200, cy:100}, 2000, function() {
+      s.clear();
+      nodes();
+    });
+  });
+}
+
+function rotated_text() {
+  var s = Snap("#svg_rotated_text");
+  var w = 400;
+  var h = 200;
+  // grid(s, 0, 0, w, h);
+
+  var line = s.line(200, 100, 300, 100);
+  line.attr({stroke:Colors.RED, strokeWidth:4, strokeLinecap:"round"});
+
+  {
+    let text = s.text(205, h/2 - 7, "set(x,4)");
+    text.attr({fontFamily:"monospace", fontSize:12});
+    text.attr({transform:"rotate(-30 200 100)"});
+  }
+
+  {
+    let text = s.text(w/2 + 32, h/2 - 7, "abcd");
+    text.attr({fontFamily:"monospace", fontSize:10});
+    let box = boxed(s, text, 1);
+    box.attr({fill:"transparent", stroke:"black"});
+    let all = s.group(text, box);
+    all.attr({transform:"rotate(-45 230 100)"});
+  }
+}
+
+function system() {
+  var s = Snap("#svg_system");
+
+  var a = ds.node(s, 100, 20, "a", ds.Color.Red);
+  var b = ds.node(s, 300, 20, "b", ds.Color.Green);
+  var s1 = ds.node(s, 200, 20, "1", ds.Color.Blue);
+  var bbox = s.group(a.element, b.element, s1.element).getBBox();
+
+  var a_actions = ["a", [
+    new ds.Message(2, "set(x,1)", "ok", "1"),
+    new ds.Delay(1.5),
+    new ds.Message(1, "get(x)", "1", "1"),
+  ]];
+  var b_actions = ["b", [
+    new ds.Delay(1),
+    new ds.Message(2, "set(y,2)", "err", "1"),
+  ]];
+
+  ds.animate(s, bbox, [a, b, s1], [a_actions, b_actions], 5000);
+}
+
 function main() {
   basic();
   animate();
   lines();
   lines_redux();
   boxes();
+  nodes();
+  rotated_text();
+  system();
 }
 
 window.onload = main;

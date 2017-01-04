@@ -63,3 +63,42 @@ svg {
 #svg_lines_redux .cline {
   stroke: blue;
 }
+
+//
+
+svg .nodecircle { }
+
+svg .nodetext {
+  font-size: 12pt;
+  font-family: monospace;
+}
+
+svg .clientname {
+  font-size: 12pt;
+  font-family: monospace;
+}
+
+svg .clientline {
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+svg .clienttext {
+  font-family: monospace;
+  font-size: 8pt;
+}
+
+svg .clientaxis {
+  stroke: gray;
+  stroke-width: 0.5;
+  stroke-linecap: round;
+}
+
+svg .clientprogress {
+  stroke: gray;
+  stroke-width: 0.5;
+}
+
+svg .msg {
+  r: 6;
+}
