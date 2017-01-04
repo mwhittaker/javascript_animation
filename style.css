@@ -95,8 +95,8 @@ svg .clientaxis {
 }
 
 svg .clientprogress {
-  stroke: gray;
-  stroke-width: 0.5;
+  stroke: black;
+  stroke-width: 1;
 }
 
 svg .msg {

@@ -130,6 +130,7 @@ ds.animation_config = function(s, bbox) {
     horiz_pad: horiz_pad,
     client_pad_right: client_pad_right,
     client_pad_left: client_pad_left,
+    client_horiz_pad: client_horiz_pad,
     client_width: client_width,
     client_height: client_height,
     action_rotation: action_rotation,
@@ -253,46 +254,51 @@ ds.animate = function(s, bbox, nodes, node_actions, invspeed) {
 
   // Animation.
   var mask_width_start = c.client_pad_left;
-  var mask_width_stop = c.client_width;
+  var mask_width_stop = c.client_width + c.client_horiz_pad;
   var progress_x_start = c.pad_left + c.client_pad_left;
-  var progress_x_stop = c.client_width + c.pad_left;
-  var msg_duration_start = 0;
-  var msg_duration_stop = max_duration;
-  var start = [mask_width_start, progress_x_start, msg_duration_start];
-  var stop = [mask_width_stop, progress_x_stop, msg_duration_stop];
+  var progress_x_stop = c.view_box_width - c.pad_right;
+  var msg_time_start = 0;
+  var msg_time_stop_extra = c.client_pad_left * (max_duration / c.client_width);
+  var msg_time_stop = max_duration + msg_time_stop_extra;
+  var start = [mask_width_start, progress_x_start, msg_time_start];
+  var stop = [mask_width_stop, progress_x_stop, msg_time_stop];
 
-  var reset = function() {
-    progress.remove();
-    window.setTimeout(function() {
-      s.clear();
-      ds.animate(s, bbox, nodes, node_actions, invspeed);
-    }, c.reset_delay);
-  }
+  var run = function() {
+    Snap.animate(start, stop, function(xs) {
+      var mask_width = xs[0];
+      mask.attr({width: mask_width});
 
-  Snap.animate(start, stop, function(xs) {
-    mask_width = xs[0];
-    mask.attr({width: mask_width});
+      var progress_x = xs[1];
+      progress.attr({x1:progress_x, x2:progress_x});
 
-    progress_x = xs[1];
-    progress.attr({x1:progress_x, x2:progress_x});
+      var msg_time = xs[2];
+      for (var i = 0; i < msgs.length; ++i) {
+        var msg = msgs[i];
+        var start = msg.delay;
+        var mid = msg.delay + (msg.duration / 2);
+        var stop = msg.delay + msg.duration;
 
-    msg_duration = xs[2];
-    console.log(msg_duration);
-    for (var i = 0; i < msgs.length; ++i) {
-      var msg = msgs[i];
-      var start = msg.delay;
-      var mid = msg.delay + (msg.duration / 2);
-      var stop = msg.delay + msg.duration;
-
-      if (start <= msg_duration || msg_duration <= mid) {
-        var fraction = (msg_duration - start) / msg.duration;
-        var dx = msg.x2 - msg.x1;
-        var dy = msg.y2 - msg.y1;
-        var cx = msg.x1 + (dx * fraction);
-        var cy = msg.y1 + (dy * fraction);
-        msg.element.attr({cx:cx, cy:cy});
-      } else if (mid <= msg_duration || msg_duration <= stop) {
+        if (start <= msg_time && msg_time <= mid) {
+          var fraction = 2 * (msg_time - start) / msg.duration;
+          var dx = msg.x2 - msg.x1;
+          var dy = msg.y2 - msg.y1;
+          var cx = msg.x1 + (dx * fraction);
+          var cy = msg.y1 + (dy * fraction);
+          msg.element.attr({cx:cx, cy:cy});
+        } else if (mid <= msg_time && msg_time <= stop) {
+          var fraction = 2 * (msg_time - mid) / msg.duration;
+          var dx = msg.x1 - msg.x2;
+          var dy = msg.y1 - msg.y2;
+          var cx = msg.x2 + (dx * fraction);
+          var cy = msg.y2 + (dy * fraction);
+          msg.element.attr({cx:cx, cy:cy});
+        }
       }
-    }
-  }, max_duration * invspeed, reset);
+    }, max_duration * invspeed, function() {
+      window.setTimeout(function() {
+        run();
+      }, c.reset_delay);
+    });
+  };
+  run();
 }
