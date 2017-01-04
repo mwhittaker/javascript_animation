@@ -146,6 +146,8 @@ ds.max_duration = function(node_actions) {
 }
 
 // TODO(mwhittaker): Comment.
+// TODO(mwhittaker): If there aren't any node actions, then we ought not to
+// create the node masks.
 //
 // Types:
 //   - s: Snap.Paper
@@ -162,12 +164,14 @@ ds.animate = function(s, bbox, nodes, node_actions, invspeed) {
     node_index[nodes[i].name] = nodes[i];
   }
 
-  var client_lines = []
-  var client_texts = []
+  var client_lines = [];
+  var client_texts = [];
+  var msgs = [];
   for (var i = 0; i < node_actions.length; ++i) {
     var node_action = node_actions[i];
     var name = node_action[0];
     var actions = node_action[1];
+    var node = node_index[name];
 
     // Client name.
     var x = c.pad_right;
@@ -191,7 +195,7 @@ ds.animate = function(s, bbox, nodes, node_actions, invspeed) {
         // Client line.
         var client_line = s.line(x, y, x + width, y);
         client_line.addClass("clientline");
-        client_line.attr({stroke:node_index[name].color});
+        client_line.attr({stroke:node.color});
         client_lines.push(client_line);
 
         // Client call.
@@ -205,6 +209,25 @@ ds.animate = function(s, bbox, nodes, node_actions, invspeed) {
             c.action_rotation, c.action_pad);
         client_resp.addClass("clienttext");
         client_texts.push(client_resp);
+
+        // Message.
+        var from_bbox = node.element.getBBox();
+        var to_bbox = node_index[action.to].element.getBBox();
+        var x1 = from_bbox.cx;
+        var y1 = from_bbox.cy;
+        var msg = s.circle(x1, y1, 0);
+        msg.addClass("msg");
+        msg.attr({fill: node.color});
+        msg.prependTo(msg.paper);
+        msgs.push({
+          delay: delay,
+          duration: action.duration,
+          x1: x1,
+          y1: y1,
+          x2: to_bbox.cx,
+          y2: to_bbox.cy,
+          element: msg,
+        });
       }
 
       x += width;
@@ -233,8 +256,10 @@ ds.animate = function(s, bbox, nodes, node_actions, invspeed) {
   var mask_width_stop = c.client_width;
   var progress_x_start = c.pad_left + c.client_pad_left;
   var progress_x_stop = c.client_width + c.pad_left;
-  var start = [mask_width_start, progress_x_start];
-  var stop = [mask_width_stop, progress_x_stop];
+  var msg_duration_start = 0;
+  var msg_duration_stop = max_duration;
+  var start = [mask_width_start, progress_x_start, msg_duration_start];
+  var stop = [mask_width_stop, progress_x_stop, msg_duration_stop];
 
   var reset = function() {
     progress.remove();
@@ -246,9 +271,28 @@ ds.animate = function(s, bbox, nodes, node_actions, invspeed) {
 
   Snap.animate(start, stop, function(xs) {
     mask_width = xs[0];
-    progress_x = xs[1];
-
     mask.attr({width: mask_width});
+
+    progress_x = xs[1];
     progress.attr({x1:progress_x, x2:progress_x});
+
+    msg_duration = xs[2];
+    console.log(msg_duration);
+    for (var i = 0; i < msgs.length; ++i) {
+      var msg = msgs[i];
+      var start = msg.delay;
+      var mid = msg.delay + (msg.duration / 2);
+      var stop = msg.delay + msg.duration;
+
+      if (start <= msg_duration || msg_duration <= mid) {
+        var fraction = (msg_duration - start) / msg.duration;
+        var dx = msg.x2 - msg.x1;
+        var dy = msg.y2 - msg.y1;
+        var cx = msg.x1 + (dx * fraction);
+        var cy = msg.y1 + (dy * fraction);
+        msg.element.attr({cx:cx, cy:cy});
+      } else if (mid <= msg_duration || msg_duration <= stop) {
+      }
+    }
   }, max_duration * invspeed, reset);
 }

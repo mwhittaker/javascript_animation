@@ -353,17 +353,17 @@ function system() {
     new ds.Message(2, "set(y,2)", "err", "1"),
   ]];
 
-  ds.animate(s, bbox, [a, b, s1], [a_actions, b_actions], 5000);
+  ds.animate(s, bbox, [a, b, s1], [a_actions, b_actions], 1000);
 }
 
 function main() {
-  basic();
-  animate();
-  lines();
-  lines_redux();
-  boxes();
-  nodes();
-  rotated_text();
+  // basic();
+  // animate();
+  // lines();
+  // lines_redux();
+  // boxes();
+  // nodes();
+  // rotated_text();
   system();
 }
 
