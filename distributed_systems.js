@@ -147,8 +147,8 @@ ds.max_duration = function(node_actions) {
 }
 
 // TODO(mwhittaker): Comment.
-// TODO(mwhittaker): If there aren't any node actions, then we ought not to
-// create the node masks.
+// TODO(mwhittaker): Messages should originate from the edge of the node, not
+// the center of the node.
 //
 // Types:
 //   - s: Snap.Paper
