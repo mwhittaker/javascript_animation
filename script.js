@@ -368,9 +368,9 @@ function event_handler() {
   var bar = s.line(100, 100, 300, 100);
   bar.attr({stroke: "red", strokeWidth: 8, strokeLinecap: "round"});
 
-  var l = s.line(200, 80, 200, 120);
+  var l = s.line(200, 85, 200, 115);
   var l_clicked = false;
-  l.attr({stroke: "black", strokeWidth: 10});
+  l.attr({stroke: "black", strokeWidth: 4});
   l.node.onmousedown = function() { l_clicked = true; };
   svg.onmouseup = function() { l_clicked = false; };
   svg.onmousemove = function(e) {
@@ -387,6 +387,26 @@ function event_handler() {
   }
 }
 
+function linear() {
+  var s = Snap("#linear");
+  var a = "a";
+  var b = "b";
+  var names = [a, b];
+  var named_actions = [
+    {name: a, action: new lin.Write(0)},
+    {name: a, action: new lin.Ok()},
+    {name: b, action: new lin.Write(1)},
+    {name: a, action: new lin.Read()},
+    {name: a, action: new lin.Ret(1)},
+    {name: a, action: new lin.Write(0)},
+    {name: a, action: new lin.Ok()},
+    {name: b, action: new lin.Ok()},
+    {name: b, action: new lin.Read()},
+    {name: b, action: new lin.Ret(1)},
+  ];
+  lin.animate(s, names, named_actions, 0);
+}
+
 function main() {
   basic();
   animate();
@@ -397,6 +417,7 @@ function main() {
   rotated_text();
   system();
   event_handler();
+  linear();
 }
 
 window.onload = main;
