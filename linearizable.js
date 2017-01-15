@@ -155,8 +155,8 @@ lin.get_config = function(s) {
     line_height: 30,
     reg_text_pad: 10,
     reg_box_pad: 0,
-    call_text_pad: 10,
-    resp_text_pad: 10,
+    call_text_pad: 14,
+    resp_text_pad: 14,
     node_height: 50,
   }
 }
@@ -176,11 +176,11 @@ lin.collect_events = function(s, names, named_actions) {
     var action = na.action;
 
     if (pending_actions[name] === undefined) {
-      assert(lin.is_call(action));
+      lin.assert(lin.is_call(action));
       pending_actions[name] = action;
       pending_indexes[name] = i;
     } else {
-      assert(lin.is_resp(action));
+      lin.assert(lin.is_resp(action));
       events[name].push({
         name: name,
         color: lin.colors[names.indexOf(name) % lin.colors.length],
