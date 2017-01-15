@@ -366,11 +366,11 @@ function event_handler() {
   }
 
   var bar = s.line(100, 100, 300, 100);
-  bar.attr({stroke: "red", strokeWidth: 4, strokeLinecap: "round"});
+  bar.attr({stroke: "red", strokeWidth: 8, strokeLinecap: "round"});
 
-  var l = s.line(200, 90, 200, 110);
+  var l = s.line(200, 80, 200, 120);
   var l_clicked = false;
-  l.attr({stroke: "black", strokeWidth: 4});
+  l.attr({stroke: "black", strokeWidth: 10});
   l.node.onmousedown = function() { l_clicked = true; };
   svg.onmouseup = function() { l_clicked = false; };
   svg.onmousemove = function(e) {
@@ -380,6 +380,11 @@ function event_handler() {
       l.attr({x1: x, x2: x});
     }
   };
+
+  bar.node.onclick = function(e) {
+    var loc = cursorPoint(e);
+    l.attr({x1: loc.x, x2: loc.x});
+  }
 }
 
 function main() {
