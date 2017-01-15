@@ -356,6 +356,32 @@ function system() {
   ds.animate(s, bbox, [a, b, s1], [a_actions, b_actions], 2000);
 }
 
+function event_handler() {
+  var s = Snap("#event_handler");
+  var svg = document.getElementById("event_handler");
+  var pt = svg.createSVGPoint();
+  function cursorPoint(evt){
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  var bar = s.line(100, 100, 300, 100);
+  bar.attr({stroke: "red", strokeWidth: 4, strokeLinecap: "round"});
+
+  var l = s.line(200, 90, 200, 110);
+  var l_clicked = false;
+  l.attr({stroke: "black", strokeWidth: 4});
+  l.node.onmousedown = function() { l_clicked = true; };
+  svg.onmouseup = function() { l_clicked = false; };
+  svg.onmousemove = function(e) {
+    if (e.which === 1 && l_clicked) {
+      var loc = cursorPoint(e);
+      var x = Math.max(Math.min(loc.x, 300), 100);
+      l.attr({x1: x, x2: x});
+    }
+  };
+}
+
 function main() {
   basic();
   animate();
@@ -365,6 +391,7 @@ function main() {
   nodes();
   rotated_text();
   system();
+  event_handler();
 }
 
 window.onload = main;
